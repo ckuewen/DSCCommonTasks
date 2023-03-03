@@ -24,7 +24,7 @@ configuration SqlScriptQueries {
     #>
     #Hashing Queries for unique Execution/Resourcename
     $HashClass = New-Object System.Security.Cryptography.SHA1Managed
-    Import-DscResource -ModuleName SqlServerDsc
+    Import-DscResource -ModuleName SqlServerDsc -Name SqlScriptQuery
 
     foreach ($query in $Queries)
     {
@@ -35,8 +35,6 @@ configuration SqlScriptQueries {
 
         $ByteString = [System.Text.Encoding]::UTF8.GetBytes(($query.ServerName+$query.InstanceName+$query.TestQuery+$query.SetQuery+$query.GetQuery))
         $hash = [System.BitConverter]::ToString($HashClass.ComputeHash($ByteString)) -replace '-',''
-
-
         $executionName = "SqlQuery_$($query.ServerName)_$($query.InstanceName)_$($hash)"
         (Get-DscSplattedResource -ResourceName SqlScriptQuery -ExecutionName $executionName -Properties $query -NoInvoke).Invoke($query)
     }
